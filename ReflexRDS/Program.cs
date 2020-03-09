@@ -11,23 +11,23 @@ namespace ReflexRDS
     {
         public static void Main(string[] args)
         {
-            Console.SetWindowSize(250, 750);
+            //Console.SetWindowSize(250, 750);
 
             printTitle();
 
-            string defaultMessage = ConfigurationSettings.AppSettings["defaultMessage"];
-            string inputFile = ConfigurationSettings.AppSettings["inputFile"];
-            string outputFile = ConfigurationSettings.AppSettings["outputFile"];
-            int sleepSeconds = Int32.Parse(ConfigurationSettings.AppSettings["sleepSeconds"]);
-            bool debug = bool.Parse(ConfigurationSettings.AppSettings["debug"]);
+            string defaultMessage = ConfigurationManager.AppSettings["defaultMessage"];
+            string inputFile = ConfigurationManager.AppSettings["inputFile"];
+            string outputFile = ConfigurationManager.AppSettings["outputFile"];
+            int sleepSeconds = Int32.Parse(ConfigurationManager.AppSettings["sleepSeconds"]);
+            bool debug = bool.Parse(ConfigurationManager.AppSettings["debug"]);
             bool first = true;
             int maxWait = 30;
             int waited = 0;
             string hashStored = "";
             string fileHash = "";
 
-            if (performChecks(inputFile,outputFile))
-            {
+            performChecks(inputFile, outputFile);
+            
                 while (true)
                 {
                     fileHash = GetHashSha256(inputFile);
@@ -58,7 +58,10 @@ namespace ReflexRDS
                     else
                     {
                         output("File changed, setting new RDS and duration. Going to sleep for " + sleepSeconds + " seconds", debug);
-                        string input = System.IO.File.ReadAllText(inputFile);
+                        string input = loadInput(inputFile);
+
+                    if (!input.Equals(""))
+                    {
                         int minutes = Int32.Parse(input.Substring(1, 2));
                         int seconds = Int32.Parse(input.Substring(4, 2));
                         string rds = "";
@@ -66,7 +69,7 @@ namespace ReflexRDS
                         hashStored = fileHash;
                         maxWait = (minutes * 60) + seconds;
 
-                        if(input.Length > 64)
+                        if (input.Length > 64)
                         {
                             rds = input.Substring(8, 72);
                         }
@@ -75,32 +78,34 @@ namespace ReflexRDS
                             rds = input.Substring(8, input.Length - 8);
                         }
 
-                        rds.Replace(",", "-");
+                        rds = rds.Replace(',', '-');
 
                         System.IO.File.WriteAllText(outputFile, rds);
 
-                        Console.WriteLine("Setting RDS to : "+rds);
+                        Console.WriteLine("Setting RDS to : " + rds);
 
                         waited = sleepSeconds;
                         sleep(sleepSeconds);
                     }
+                    else
+                    {
+                        Console.WriteLine("Could not read inputfile. Setting default value and sleeping for " + sleepSeconds + " seconds", debug);
+                        System.IO.File.WriteAllText(outputFile, defaultMessage);
+                        sleep(sleepSeconds);
+                    }
+                    }
                 }
-            }
-            else
-            {
-                Console.WriteLine("Invalid configuration: one or more files could not be found!");
-            }
         }
 
-        private static bool performChecks(string inputFile, string outputFile)
+        private static void performChecks(string inputFile, string outputFile)
         {
-            if (System.IO.File.Exists(inputFile) && System.IO.File.Exists(outputFile))
+            if (!System.IO.File.Exists(inputFile))
             {
-                return true;
+                System.IO.File.Create(inputFile);
             }
-            else
+                if(!System.IO.File.Exists(outputFile))
             {
-                return false;
+                System.IO.File.Create(outputFile);
             }
         }
 
@@ -165,6 +170,31 @@ namespace ReflexRDS
             {
                 Console.WriteLine(message);
             }
+        }
+
+        private static string loadInput(string inputFile)
+        {
+            string retValue = "";
+                try
+                {
+                    using (FileStream fileStream = new FileStream(
+                        inputFile,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.ReadWrite))
+                    {
+                        using (StreamReader streamReader = new StreamReader(fileStream))
+                        {
+                            retValue = streamReader.ReadToEnd();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    retValue = "";
+                }
+            return retValue;
         }
     }
 }
