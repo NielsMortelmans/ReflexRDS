@@ -121,24 +121,6 @@ namespace ReflexRDS
 
         private static void printTitle()
         {
-            /*Console.WriteLine("#     #   #     #        ");
-            Console.WriteLine("##    # # ##   ##  ####  ");
-            Console.WriteLine("# #   # # # # # # #    # ");
-            Console.WriteLine("#  #  # # #  #  # #    # ");
-            Console.WriteLine("#   # # # #     # #    # ");
-            Console.WriteLine("#    ## # #     # #    # ");
-            Console.WriteLine("#     # # #     #  ####  ");
-            Console.WriteLine("");
-            Console.WriteLine("");
-            Console.WriteLine("###                                                          ");
-            Console.WriteLine(" #  #    # #####  #    #  ####  ##### #####  # ######  ####  ");
-            Console.WriteLine(" #  ##   # #    # #    # #        #   #    # # #      #      ");
-            Console.WriteLine(" #  # #  # #    # #    #  ####    #   #    # # #####   ####  ");
-            Console.WriteLine(" #  #  # # #    # #    #      #   #   #####  # #           # ");
-            Console.WriteLine(" #  #   ## #    # #    # #    #   #   #   #  # #      #    # ");
-            Console.WriteLine("### #    # #####   ####   ####    #   #    # # ######  ####  ");
-            Console.WriteLine("");
-            Console.WriteLine("");*/
             Console.WriteLine("######                                        ######  ######   #####  ");
             Console.WriteLine("#     # ###### ###### #      ###### #    #    #     # #     # #     # ");
             Console.WriteLine("#     # #      #      #      #       #  #     #     # #     # #       ");
