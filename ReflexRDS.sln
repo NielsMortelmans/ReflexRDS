@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReflexRDS", "ReflexRDS\ReflexRDS.csproj", "{F495ACD0-772C-4764-922B-7239F0F24450}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|anycpu = Debug|anycpu
+		Release|anycpu = Release|anycpu
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F495ACD0-772C-4764-922B-7239F0F24450}.Debug|anycpu.ActiveCfg = Debug|anycpu
+		{F495ACD0-772C-4764-922B-7239F0F24450}.Debug|anycpu.Build.0 = Debug|anycpu
+		{F495ACD0-772C-4764-922B-7239F0F24450}.Release|anycpu.ActiveCfg = Release|anycpu
+		{F495ACD0-772C-4764-922B-7239F0F24450}.Release|anycpu.Build.0 = Release|anycpu
+	EndGlobalSection
+EndGlobal
