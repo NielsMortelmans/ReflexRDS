@@ -3,6 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace ReflexRDS
@@ -11,8 +12,6 @@ namespace ReflexRDS
     {
         public static void Main(string[] args)
         {
-            //Console.SetWindowSize(250, 750);
-
             printTitle();
 
             string defaultMessage = ConfigurationManager.AppSettings["defaultMessage"];
@@ -21,7 +20,7 @@ namespace ReflexRDS
             int sleepSeconds = Int32.Parse(ConfigurationManager.AppSettings["sleepSeconds"]);
             bool debug = bool.Parse(ConfigurationManager.AppSettings["debug"]);
             bool first = true;
-            int maxWait = 30;
+            int maxWait = 0;
             int waited = 0;
             string hashStored = "";
             string fileHash = "";
@@ -31,14 +30,22 @@ namespace ReflexRDS
                 while (true)
                 {
                     fileHash = GetHashSha256(inputFile);
+                    DateTime now = DateTime.Now;
                     if (first)
                     {
                         hashStored = fileHash;
                         System.IO.File.WriteAllText(outputFile, defaultMessage);
                         first = false;
                         Console.WriteLine("First iteration, setting RDS to default message");
+                        continue;
                     }
-
+                if (now.Minute.ToString().Equals("59") && now.Second > 50)
+                {
+                    Console.WriteLine("Time for news ("+now.TimeOfDay.ToString()+"), setting RDS to default message");
+                    System.IO.File.WriteAllText(outputFile, defaultMessage);
+                    hashStored = GetHashSha256(inputFile);
+                    continue;
+                }
                     if(hashStored.Equals(fileHash))
                     {
                         if (maxWait.Equals(waited))
@@ -57,11 +64,8 @@ namespace ReflexRDS
                     }
                     else
                     {
-                        output("File changed, setting new RDS and duration. Going to sleep for " + sleepSeconds + " seconds", debug);
                         string input = loadInput(inputFile);
 
-                    if (!input.Equals(""))
-                    {
                         int minutes = Int32.Parse(input.Substring(1, 2));
                         int seconds = Int32.Parse(input.Substring(4, 2));
                         string rds = "";
@@ -78,21 +82,17 @@ namespace ReflexRDS
                             rds = input.Substring(8, input.Length - 8);
                         }
 
-                        rds = rds.Replace(',', '-');
+                        string pattern = "[,]";
+                        Regex rgx = new Regex(pattern);
+                        rds = rgx.Replace(rds, " -");
 
                         System.IO.File.WriteAllText(outputFile, rds);
-
-                        Console.WriteLine("Setting RDS to : " + rds);
+                    output("File changed, setting new RDS and duration ("+maxWait+"). Going to sleep for " + sleepSeconds + " seconds", debug);
+                    Console.WriteLine("Setting RDS to : " + rds);
 
                         waited = sleepSeconds;
                         sleep(sleepSeconds);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Could not read inputfile. Setting default value and sleeping for " + sleepSeconds + " seconds", debug);
-                        System.IO.File.WriteAllText(outputFile, defaultMessage);
-                        sleep(sleepSeconds);
-                    }
+
                     }
                 }
         }
@@ -156,27 +156,8 @@ namespace ReflexRDS
 
         private static string loadInput(string inputFile)
         {
-            string retValue = "";
-                try
-                {
-                    using (FileStream fileStream = new FileStream(
-                        inputFile,
-                        FileMode.Open,
-                        FileAccess.Read,
-                        FileShare.ReadWrite))
-                    {
-                        using (StreamReader streamReader = new StreamReader(fileStream))
-                        {
-                            retValue = streamReader.ReadToEnd();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    retValue = "";
-                }
-            return retValue;
+            System.IO.File.Copy(inputFile, "input_tmp.log", true);
+            return System.IO.File.ReadAllText("input_tmp.log");
         }
     }
 }
